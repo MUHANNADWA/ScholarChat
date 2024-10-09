@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "197299232559",
+    "project_id": "scholar-chat-app-muhannadw",
+    "storage_bucket": "scholar-chat-app-muhannadw.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:197299232559:android:6c56733af79a914fca0bda",
+        "android_client_info": {
+          "package_name": "com.example.sc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb6TN5IdXyJUk3eRWXUcd-dz_ZF-Z08oA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:197299232559:android:3410770638cd7350ca0bda",
+        "android_client_info": {
+          "package_name": "com.example.scholar_chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb6TN5IdXyJUk3eRWXUcd-dz_ZF-Z08oA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
