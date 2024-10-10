@@ -75,7 +75,6 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 10),
                 MyTextFeild(
                   hint: 'Password',
-                  obscureText: true,
                   keyboardType: TextInputType.visiblePassword,
                   onChanged: (value) {
                     password = value;

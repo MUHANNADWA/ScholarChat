@@ -1,12 +1,13 @@
 import 'dart:developer';
 
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:scholar_chat/constants.dart';
 import 'package:scholar_chat/models/message.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:scholar_chat/widgets/chat%20bubbles/chat%20bubble/chat_bubble_last.dart';
 import 'package:scholar_chat/widgets/chat%20bubbles/chat%20bubble%20sender/chat_bubble_sender_first.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:scholar_chat/widgets/chat%20bubbles/chat%20bubble/chat_bubble_first.dart';
 import 'package:scholar_chat/widgets/chat%20bubbles/chat%20bubble%20sender/chat_bubble_sender.dart';
 import 'package:scholar_chat/widgets/chat%20bubbles/chat%20bubble/chat_bubble.dart';
@@ -15,27 +16,12 @@ import 'package:scholar_chat/widgets/chat%20bubbles/chat%20bubble%20sender/chat_
 class ChatPage extends StatelessWidget {
   ChatPage({Key? key}) : super(key: key);
 
-  final CollectionReference messages =
-      FirebaseFirestore.instance.collection(kMessagesCollection);
-
-  final users = FirebaseFirestore.instance
-      .collection(kUsersCollection)
-      .get()
-      .then((QuerySnapshot querySnapshot) {
-    for (var doc in querySnapshot.docs) {
-      log(doc["color"].toString());
-    }
-  });
+  // final user = FirebaseAuth.instance.currentUser.;
 
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  String? email;
-
   @override
   Widget build(BuildContext context) {
-    Map settings = ModalRoute.of(context)!.settings.arguments as Map;
-    email = settings['email'];
-
     return StreamBuilder<QuerySnapshot>(
       stream: messages.orderBy(kCreatedAt, descending: true).snapshots(),
       builder: (context, snapshot) {
@@ -46,10 +32,42 @@ class ChatPage extends StatelessWidget {
           }
 
           return Scaffold(
-            backgroundColor: const Color.fromARGB(255, 183, 225, 228),
+            backgroundColor: kBackgroundColor,
             appBar: AppBar(
               backgroundColor: kPrimaryColor,
               foregroundColor: Colors.white,
+              actions: <Widget>[
+                PopupMenuButton<String>(
+                  color: kPrimaryColor,
+                  offset: const Offset(0, 53),
+                  onSelected: (String value) async {
+                    if (value == 'Log out') {
+                      await signOut(context);
+                    }
+                    if (value == 'Clear messages') {
+                      showSnackBar(context, 'This is not available now');
+                    }
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'Log out',
+                        child: Text(
+                          'Log out',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'Clear messages',
+                        child: Text(
+                          'Clear messages',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ];
+                  },
+                ),
+              ],
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -57,63 +75,82 @@ class ChatPage extends StatelessWidget {
                     kLogo,
                     scale: 1.8,
                   ),
-                  const Text('Chat')
+                  const Text('Chat'),
                 ],
               ),
             ),
-            body: Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    reverse: true,
-                    controller: _scrollController,
-                    itemCount: messagesList.length,
-                    itemBuilder: (context, index) {
-                      return showMessage(index, messagesList);
-                    },
-                  ),
+            body: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/doodles.png"),
+                  repeat: ImageRepeat.repeat,
+                  opacity: 0.12,
+                  scale: 20,
                 ),
-                TextField(
-                  keyboardType: TextInputType.multiline,
-                  minLines: 1,
-                  maxLines: 5,
-                  controller: _controller,
-                  onSubmitted: (value) async {
-                    await sendMessage();
-                  },
-                  decoration: InputDecoration(
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white),
-                      onPressed: () {
-                        sendMessage();
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      reverse: true,
+                      controller: _scrollController,
+                      itemCount: messagesList.length,
+                      itemBuilder: (context, index) {
+                        return showMessage(index, messagesList);
                       },
                     ),
-                    suffixIconColor: Colors.white,
-                    border: const OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.zero),
-                    hintText: 'send message',
-                    hintStyle: const TextStyle(
-                        color: Color.fromARGB(150, 255, 255, 255)),
-                    filled: true,
-                    fillColor: kPrimaryColor,
                   ),
-                ),
-              ],
+                  TextField(
+                    keyboardType: TextInputType.multiline,
+                    minLines: 1,
+                    maxLines: 5,
+                    controller: _controller,
+                    onSubmitted: (value) async {
+                      await sendMessage();
+                    },
+                    decoration: InputDecoration(
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        onPressed: () {
+                          sendMessage();
+                        },
+                      ),
+                      suffixIconColor: Colors.white,
+                      border: const OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.zero),
+                      hintText: 'send message',
+                      hintStyle: const TextStyle(
+                          color: Color.fromARGB(150, 255, 255, 255)),
+                      filled: true,
+                      fillColor: kPrimaryColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         } else {
           return const BlurryModalProgressHUD(
-              blurEffectIntensity: 4,
-              opacity: 0.05,
-              inAsyncCall: true,
-              child: Center(child: Text('Loading...')));
+            blurEffectIntensity: 4,
+            opacity: 0.05,
+            inAsyncCall: true,
+            child: Scaffold(
+              backgroundColor: Colors.black,
+            ),
+          );
         }
       },
     );
   }
 
-  StatelessWidget showMessage(int index, List<Message> messagesList) {
+  Future<void> signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    showSnackBar(context, 'Logged out successfully');
+    Navigator.pushNamedAndRemoveUntil(context, kSignInPageId, (route) => false);
+  }
+
+  showMessage(int index, List<Message> messagesList) {
     if (messageIsFirst(index, messagesList)) {
       return amITheSender(index, messagesList)
           ? ChatBubbleFirst(
@@ -151,24 +188,26 @@ class ChatPage extends StatelessWidget {
         (index == 0 || messagesList[index].id != messagesList[index - 1].id);
   }
 
-  sendMessage() {
+  sendMessage() async {
+    log('message');
     _controller.text = _controller.text.trim();
     if (_controller.text.isNotEmpty) {
-      messages
-          .add({
-            kMessage: _controller.text,
-            kCreatedAt: DateTime.now(),
-            kId: email,
-          })
-          .then((_) => log(
-              'message ${_controller.text.toString()} at ${DateTime.now()} Added'))
-          .catchError((error) => log("Failed to add message: $error"));
+      messages.add({
+        kMessage: _controller.text,
+        kCreatedAt: Timestamp.now(),
+        kId: email,
+        kUser: await user as Map,
+      }).then((_) {
+        log('message ${_controller.text.toString()} at ${DateTime.now()} Added');
+      }).catchError((error) {
+        log("Failed to add message: $error");
+      });
+      _controller.clear();
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeIn,
+      );
     }
-    _controller.clear();
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeIn,
-    );
   }
 }

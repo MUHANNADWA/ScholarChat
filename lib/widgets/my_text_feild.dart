@@ -1,35 +1,57 @@
 import 'package:flutter/material.dart';
 
-class MyTextFeild extends StatelessWidget {
-  const MyTextFeild({
+class MyTextFeild extends StatefulWidget {
+  MyTextFeild({
     Key? key,
     required this.hint,
     this.keyboardType,
     this.onChanged,
-    this.obscureText,
   }) : super(key: key);
 
   final String hint;
   final Function(String)? onChanged;
   final TextInputType? keyboardType;
-  final bool? obscureText;
 
+  @override
+  State<MyTextFeild> createState() => _MyTextFeildState();
+}
+
+class _MyTextFeildState extends State<MyTextFeild> {
+  bool obscureText = true;
+  Color eyeColor = const Color.fromARGB(100, 255, 255, 255);
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      obscureText: obscureText ?? false,
+      obscureText: widget.hint != 'Password' ? false : obscureText,
       validator: (value) {
         if (value!.isEmpty) return 'This feild can not be empty!';
         return null;
       },
-      keyboardType: keyboardType ?? TextInputType.visiblePassword,
-      onChanged: onChanged ?? (value) {},
+      keyboardType: widget.keyboardType ?? TextInputType.visiblePassword,
+      onChanged: widget.onChanged ?? (value) {},
       decoration: InputDecoration(
-          border: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white),
-          ),
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.white)),
+        border: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+        hintText: widget.hint,
+        hintStyle: const TextStyle(color: Colors.white),
+        suffixIcon: widget.hint == 'Password'
+            ? IconButton(
+                onPressed: () {
+                  setState(() {
+                    obscureText = !obscureText;
+                    if (eyeColor == const Color.fromARGB(100, 255, 255, 255)) {
+                      eyeColor = Colors.white;
+                    } else {
+                      eyeColor = const Color.fromARGB(100, 255, 255, 255);
+                    }
+                  });
+                },
+                icon: const Icon(Icons.remove_red_eye_rounded),
+                color: eyeColor,
+              )
+            : const SizedBox(),
+      ),
     );
   }
 }

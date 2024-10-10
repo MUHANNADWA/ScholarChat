@@ -62,7 +62,6 @@ class _SigninPageState extends State<SigninPage> {
                 const SizedBox(height: 10),
                 MyTextFeild(
                   hint: 'Password',
-                  obscureText: true,
                   keyboardType: TextInputType.visiblePassword,
                   onChanged: (value) {
                     password = value;
@@ -95,7 +94,7 @@ class _SigninPageState extends State<SigninPage> {
                         }
                       } catch (e) {
                         showSnackBar(context,
-                            'Something went wrong, please try again later');
+                            'Something went wrong, please try again later $e');
                       }
                       setState(() {
                         isLoading = false;
